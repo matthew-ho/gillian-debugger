@@ -9,6 +9,10 @@
   },
   "dependencies": {
     "@opam/dune": ">= 2.0",
+    "@opam/lwt": ">= 5.4.0",
+    "@opam/lwt_ppx": ">= 2.0.2",
+    "@opam/ppx_let": ">= v0.14.0",
+    "@opam/yojson": ">= 1.7.0",
     "ocaml": ">= 4.8.0"
   },
   "devDependencies": {
@@ -18,7 +22,6 @@
     "@opam/ocamlformat": "*",
     "@opam/odoc": "*",
     "@opam/utop": "*",
-
     "ocaml": "~4.10.0"
   },
   "scripts": {

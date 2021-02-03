@@ -1,6 +1,6 @@
 (library
  (name gillian_debugger)
  (public_name gillian-debugger)
- (flags (:standard -open StdLabels)))
-
-(include_subdirs unqualified)
+ (libraries lwt.unix rpc utils)
+ (flags -open Utils)
+ (preprocess (pps lwt_ppx ppx_let)))
