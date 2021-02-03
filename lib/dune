@@ -1,0 +1,6 @@
+(library
+ (name gillian_debugger)
+ (public_name gillian-debugger)
+ (flags (:standard -open StdLabels)))
+
+(include_subdirs unqualified)

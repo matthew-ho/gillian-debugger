@@ -1,0 +1,13 @@
+(source (official bin))
+(config username "Matthew Ho")
+(config project_name "Gillian Debugger")
+(config npm_username "Matthew Ho")
+(config github_username matthew-ho)
+(config project_description
+ "A debugger for Gillian built for the Debug Adapter Protocol (DAP)")
+(config package_manager Esy)
+(config ci_cd Github)
+(config syntax OCaml)
+(config project_snake gillian_debugger)
+(config project_slug gillian-debugger)
+(config test_framework Alcotest)
