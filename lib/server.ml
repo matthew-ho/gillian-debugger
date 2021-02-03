@@ -1,5 +1,5 @@
 let rec loop () =
-  let%lwt raw_json_res = Rpc.read_yojson () in
+  let raw_json_res = Rpc.read_yojson () in
   let () =
     match raw_json_res with
     | Ok json ->
@@ -9,6 +9,4 @@ let rec loop () =
   in
   loop ()
 
-let start_server () = loop ()
-
-let start () = Lwt_main.run (start_server ())
+let start () = loop ()

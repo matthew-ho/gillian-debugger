@@ -3,22 +3,18 @@
   "esy": {
     "build": "dune build -p #{self.name}",
     "buildDev": "dune build --root . --only-package #{self.name}",
-    "buildEnv": {
-      "ODOC_SYNTAX": "ml"
-    }
+    "buildEnv": { "ODOC_SYNTAX": "ml" }
   },
   "dependencies": {
     "@opam/dune": ">= 2.0",
-    "@opam/lwt": ">= 5.4.0",
-    "@opam/lwt_ppx": ">= 2.0.2",
-    "@opam/ppx_let": ">= v0.14.0",
+    "@opam/fmt": "0.8.9",
     "@opam/yojson": ">= 1.7.0",
     "ocaml": ">= 4.8.0"
   },
   "devDependencies": {
     "@opam/alcotest": "*",
     "@opam/dune-release": "*",
-    "@opam/merlin": "*",
+    "@opam/ocaml-lsp-server": "*",
     "@opam/ocamlformat": "*",
     "@opam/odoc": "*",
     "@opam/utop": "*",

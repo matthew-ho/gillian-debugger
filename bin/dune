@@ -4,5 +4,3 @@
  (libraries gillian-debugger)
  (flags
   (:standard -open StdLabels)))
-
-(include_subdirs unqualified)

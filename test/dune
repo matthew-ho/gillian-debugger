@@ -1,6 +1,6 @@
 (library
  (name gillian_debugger_test)
- (libraries alcotest gillian-debugger)
+ (libraries alcotest gillian-debugger fmt)
  (modules
   (:standard \ test_runner))
  (flags

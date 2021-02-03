@@ -1,7 +1,5 @@
 (library
  (name gillian_debugger)
  (public_name gillian-debugger)
- (libraries lwt.unix rpc utils)
- (flags -open Utils)
- (preprocess
-  (pps lwt_ppx ppx_let)))
+ (libraries rpc utils)
+ (flags -open Utils))
