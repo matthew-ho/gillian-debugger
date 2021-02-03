@@ -3,13 +3,15 @@
  (libraries alcotest gillian-debugger)
  (modules
   (:standard \ test_runner))
- (flags (:standard -linkall -g -open StdLabels)))
+ (flags
+  (:standard -linkall -g -open StdLabels)))
 
 (executable
  (name test_runner)
  (libraries alcotest gillian_debugger_test)
  (modules test_runner)
- (flags (:standard -open StdLabels)))
+ (flags
+  (:standard -open StdLabels)))
 
 (rule
  (alias runtest)

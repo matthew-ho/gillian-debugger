@@ -16,9 +16,12 @@ let l jl = `List jl
 let ( % ) json field =
   let rec find_field l =
     match l with
-    | [] -> None
-    | (k, v) :: _ when field = k -> Some v
-    | _ :: r -> find_field r
+    | [] ->
+      None
+    | (k, v) :: _ when field = k ->
+      Some v
+    | _ :: r ->
+      find_field r
   in
   match json with `Assoc l -> find_field l | _ -> None
 

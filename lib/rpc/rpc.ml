@@ -17,17 +17,21 @@ let read_yojson ?(channel = Lwt_io.stdin) () =
     let json_or_error =
       try Ok (Json.parse raw) with
       | Failure message ->
-          Error
-            (Printf.sprintf "Cannot parse: \n\n%s\n\n as json. Message : %s"
-               raw message)
+        Error
+          (Printf.sprintf
+             "Cannot parse: \n\n%s\n\n as json. Message : %s"
+             raw
+             message)
       | e ->
-          Error
-            (Printf.sprintf
-               "Cannot parse : \n\n%s\n\n as json. Exception : %s" raw
-               (Printexc.to_string e))
+        Error
+          (Printf.sprintf
+             "Cannot parse : \n\n%s\n\n as json. Exception : %s"
+             raw
+             (Printexc.to_string e))
     in
     Lwt.return json_or_error
-  else Lwt.return (Error (Printf.sprintf "Invalid header"))
+  else
+    Lwt.return (Error (Printf.sprintf "Invalid header"))
 
 let write_yojson ?(channel = Lwt_io.stdout) outyj =
   let content = Json.json_to_string outyj in
