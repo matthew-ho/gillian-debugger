@@ -1,5 +1,5 @@
 (library
  (name rpc)
  (public_name gillian-debugger.rpc)
- (libraries utils)
+ (libraries utils stdio)
  (flags -open Utils))

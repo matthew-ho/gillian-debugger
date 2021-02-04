@@ -1,5 +1,8 @@
 let read_yojson ?(channel = stdin) () =
-  let clength = input_line channel in
+  let clength = match Stdio.In_channel.input_line channel with
+    | Some clength -> clength
+    | None -> ""
+  in
   let cl = "Content-Length: " in
   let cll = String.length cl in
   if String.sub clength 0 cll = cl then

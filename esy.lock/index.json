@@ -1,5 +1,5 @@
 {
-  "checksum": "aea8d7a237d5c4965be917acdca52cbf",
+  "checksum": "c8440ca3b16284ed8b3a3e717987831d",
   "root": "gillian-debugger@link-dev:./esy.json",
   "node": {
     "ocaml@4.10.2000@d41d8cd9": {
@@ -24,7 +24,8 @@
       "overrides": [],
       "dependencies": [
         "ocaml@4.10.2000@d41d8cd9", "@opam/yojson@opam:1.7.0@7056d985",
-        "@opam/fmt@opam:0.8.9@e0843a5b", "@opam/dune@opam:2.8.2@3d714e5f"
+        "@opam/stdio@opam:v0.14.0@a624e254", "@opam/fmt@opam:0.8.9@e0843a5b",
+        "@opam/dune@opam:2.8.2@3d714e5f"
       ],
       "devDependencies": [
         "ocaml@4.10.2000@d41d8cd9", "@opam/utop@opam:2.7.0@163ac7ce",
