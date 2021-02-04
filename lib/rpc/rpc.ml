@@ -1,23 +1,29 @@
 let read_yojson ?(channel = stdin) () =
-  let clength = match Stdio.In_channel.input_line channel with
-    | Some clength -> clength
-    | None -> ""
+  let clength =
+    match Stdio.In_channel.input_line channel with
+    | Some clength ->
+      clength
+    | None ->
+      ""
+  in
+  (* Read empty line, representing end of header *)
+  let has_end_of_header =
+    match Stdio.In_channel.input_line channel with
+    | Some end_of_header ->
+      end_of_header = ""
+    | None ->
+      false
   in
   let cl = "Content-Length: " in
   let cll = String.length cl in
-  if String.sub clength 0 cll = cl then
-    let offset = match Sys.os_type with "Win32" -> 0 | _ -> 0 in
-    let numstr =
-      String.sub clength cll (String.length clength - cll + offset)
-    in
-    let num =
-      int_of_string numstr + match Sys.os_type with "Win32" -> 1 | _ -> 2
-    in
+  if String.sub clength 0 cll = cl && has_end_of_header then
+    let numstr = String.sub clength cll (String.length clength - cll) in
+    let num = int_of_string numstr in
     (* num is supposedly the length of the json message *)
     let buffer = Bytes.create num in
     let read_bytes = Stdlib.input channel buffer 0 num in
     if read_bytes != num then
-      Error (Printf.sprintf "Insuffience data in buffer")
+      Error (Printf.sprintf "Insufficient data in buffer")
     else
       let raw = Bytes.to_string buffer in
       let json_or_error =
