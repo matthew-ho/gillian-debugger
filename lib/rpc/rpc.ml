@@ -1,16 +1,17 @@
 let read_yojson ?(stream = Stream.of_channel stdin) () =
   let cl = "Content-Length: " in
   let cll = String.length cl in
-  let clength = Extensions.to_string (Extensions.take cll stream) in
-  let num_char_stream = Extensions.take_while (fun x -> x != '\r') stream in
-  let num_json_bytes = int_of_string (Extensions.to_string num_char_stream) in
+  let clength = Stream.to_string (Stream.take cll stream) in
+  let num_json_bytes_str =
+    Stream.to_string (Stream.take_while (fun x -> x != '\r') stream)
+  in
   let expected_end_of_header = "\r\n\r\n" in
   let end_of_header =
-    Extensions.to_string
-      (Extensions.take (String.length expected_end_of_header) stream)
+    Stream.to_string (Stream.take (String.length expected_end_of_header) stream)
   in
   if clength = cl && end_of_header = expected_end_of_header then
-    let raw = Extensions.to_string (Extensions.take num_json_bytes stream) in
+    let num_json_bytes = int_of_string num_json_bytes_str in
+    let raw = Stream.to_string (Stream.take num_json_bytes stream) in
     if String.length raw != num_json_bytes then
       Error (Printf.sprintf "Insufficient data in buffer")
     else
