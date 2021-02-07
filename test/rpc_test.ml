@@ -1,6 +1,6 @@
 open Alcotest
 
-(** Test suite for the Utils module. *)
+(* Test suite for the Rpc module. *)
 
 let example_header = "Content-Length: 119\r\n\r\n"
 
