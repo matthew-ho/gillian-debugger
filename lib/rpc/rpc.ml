@@ -1,31 +1,20 @@
-let read_yojson ?(channel = stdin) () =
-  let clength =
-    match Stdio.In_channel.input_line channel with
-    | Some clength ->
-      clength
-    | None ->
-      ""
-  in
-  (* Read empty line, representing end of header *)
-  let has_end_of_header =
-    match Stdio.In_channel.input_line channel with
-    | Some end_of_header ->
-      end_of_header = ""
-    | None ->
-      false
-  in
+let read_yojson ?(stream = Stream.of_channel stdin) () =
   let cl = "Content-Length: " in
   let cll = String.length cl in
-  if String.sub clength 0 cll = cl && has_end_of_header then
-    let numstr = String.sub clength cll (String.length clength - cll) in
-    let num = int_of_string numstr in
-    (* num is supposedly the length of the json message *)
-    let buffer = Bytes.create num in
-    let read_bytes = Stdlib.input channel buffer 0 num in
-    if read_bytes != num then
+  let clength = Stream.to_string (Stream.take cll stream) in
+  let num_json_bytes_str =
+    Stream.to_string (Stream.take_while (fun x -> x != '\r') stream)
+  in
+  let expected_end_of_header = "\r\n\r\n" in
+  let end_of_header =
+    Stream.to_string (Stream.take (String.length expected_end_of_header) stream)
+  in
+  if clength = cl && end_of_header = expected_end_of_header then
+    let num_json_bytes = int_of_string num_json_bytes_str in
+    let raw = Stream.to_string (Stream.take num_json_bytes stream) in
+    if String.length raw != num_json_bytes then
       Error (Printf.sprintf "Insufficient data in buffer")
     else
-      let raw = Bytes.to_string buffer in
       let json_or_error =
         try Ok (Json.parse raw) with
         | Failure message ->
