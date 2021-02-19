@@ -21,3 +21,6 @@ _export/
 npm-debug.log
 yarn-error.log
 node_modules/
+
+# Gillian debugger logs
+*.log
