@@ -6,6 +6,7 @@
     "buildEnv": { "ODOC_SYNTAX": "ml" }
   },
   "dependencies": {
+    "@opam/dap": "1.0.5",
     "@opam/dune": ">= 2.0",
     "@opam/fmt": "0.8.9",
     "@opam/stdio": "v0.14.0",
