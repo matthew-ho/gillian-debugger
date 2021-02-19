@@ -1,7 +1,7 @@
 let file_name = "./gillian-debugger.log"
 
 let info line =
-  let out = open_out_gen [Open_append; Open_creat] 0o666 file_name in
+  let out = open_out_gen [ Open_append; Open_creat ] 0o666 file_name in
   Printf.fprintf out "%s\n" line;
   close_out out
 
