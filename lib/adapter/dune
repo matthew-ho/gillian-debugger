@@ -1,0 +1,6 @@
+(library
+ (name adapter)
+ (public_name gillian-debugger.adapter)
+ (preprocess
+  (pps lwt_ppx ppx_deriving_yojson))
+ (libraries log dap.rpc_lwt dap.types))

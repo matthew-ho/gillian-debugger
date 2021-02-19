@@ -1,5 +1,5 @@
 (library
  (name gillian_debugger)
  (public_name gillian-debugger)
- (libraries rpc utils)
+ (libraries adapter rpc utils dap.rpc_lwt)
  (flags -open Utils))
