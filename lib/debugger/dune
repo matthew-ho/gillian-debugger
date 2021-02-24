@@ -1,0 +1,6 @@
+(library
+ (name debugger)
+ (public_name gillian-debugger.debugger)
+ (preprocess
+  (pps lwt_ppx ppx_deriving_yojson))
+ (libraries log))

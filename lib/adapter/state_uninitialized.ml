@@ -1,4 +1,4 @@
-open Debug_protocol
+open Debug_protocol_ex
 
 let run rpc =
   let promise, resolver = Lwt.task () in
@@ -10,6 +10,7 @@ let run rpc =
     (module Initialize_command)
     (fun arg ->
       prevent_reenter ();
+      Log.info "Initialize request received";
       let caps =
         Capabilities.(
           make
