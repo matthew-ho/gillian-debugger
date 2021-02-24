@@ -12,7 +12,7 @@ let run rpc =
       Log.info "Launch request received";
       prevent_reenter ();
       Debugger.launch launch_args.Launch_command.Arguments.program;
-      Lwt.wakeup_later resolver ();
+      Lwt.wakeup_later resolver launch_args;
       Lwt.return_unit);
   Debug_rpc.set_command_handler rpc
     (module Attach_command)

@@ -14,7 +14,6 @@ let run rpc =
       let caps =
         Capabilities.(
           make
-            ~supports_terminate_request:(Some true)
             ~supports_configuration_done_request:(Some true)
             ~supports_breakpoint_locations_request:(Some true)
             ())
