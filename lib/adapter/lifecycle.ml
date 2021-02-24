@@ -22,7 +22,11 @@ let run ~launch_args rpc =
         Debug_rpc.send_event
           rpc
           (module Stopped_event)
-          Stopped_event.Payload.(make ~reason:Stopped_event.Payload.Reason.Entry ~thread_id:(Some 0) ())));
+          Stopped_event.Payload.(
+            make
+              ~reason:Stopped_event.Payload.Reason.Entry
+              ~thread_id:(Some 0)
+              ())));
   Debug_rpc.set_command_handler
     rpc
     (module Disconnect_command)
