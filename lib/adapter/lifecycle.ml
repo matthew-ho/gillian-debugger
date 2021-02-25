@@ -14,9 +14,20 @@ let run ~launch_args rpc =
       let open Launch_command.Arguments in
       if not launch_args.stop_on_entry then (
         Log.info "Do not stop on entry";
-        Debugger.run ();
-        (* Do not send Terminated event to allow for stepping backwards *)
-        Lwt.return_unit)
+        let stop_reason = Debugger.run () in
+        match stop_reason with
+        | Debugger.Exited ->
+          Lwt.return_unit
+          (* Do not send Terminated event to allow for stepping backwards *)
+        | Debugger.Uncaught_exc ->
+          Debug_rpc.send_event
+            rpc
+            (module Stopped_event)
+            Stopped_event.Payload.(
+              make
+                ~reason:Stopped_event.Payload.Reason.Exception
+                ~thread_id:(Some 0)
+                ()))
       else (
         Log.info "Stop on entry";
         Debug_rpc.send_event

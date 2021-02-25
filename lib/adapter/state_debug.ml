@@ -1,1 +1,2 @@
-let run ~launch_args rpc = Lwt.join [ Lifecycle.run ~launch_args rpc ]
+let run ~launch_args rpc =
+  Lwt.join [ Lifecycle.run ~launch_args rpc; Inspect.run rpc ]
