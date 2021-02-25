@@ -25,7 +25,7 @@ let rec run () =
     run ()
 
 let get_frames () =
-  [ ({ index = 0
+  [ ({ index = Debugger_state.get_index ()
      ; name = Debugger_state.get_name ()
      ; source_path = Debugger_state.get_source ()
      ; line_num = Debugger_state.get_curr_line_num ()
