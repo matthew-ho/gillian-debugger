@@ -16,6 +16,13 @@ let run ~launch_args rpc =
         Log.info "Do not stop on entry";
         let stop_reason = Debugger.run () in
         match stop_reason with
+        | Debugger.Step ->
+          let () =
+            Log.info
+              "Debugger stopped because of step after running. This should not \
+               happen"
+          in
+          Lwt.return_unit
         | Debugger.Exited ->
           Lwt.return_unit
           (* Do not send Terminated event to allow for stepping backwards *)

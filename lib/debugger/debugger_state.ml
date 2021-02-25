@@ -44,6 +44,8 @@ let get_name () = "This is a test"
 
 let get_source () = !file_source
 
-let get_curr_line_num () = !current_line
+(* Line numbers in client start from 1. Our line numbers start from 0. *)
+let get_curr_line_num () = !current_line + 1
 
-let get_curr_col_num () = !current_col
+(* Column numbers in client start from 1. Our column numbers start from 0. *)
+let get_curr_col_num () = !current_col + 1
