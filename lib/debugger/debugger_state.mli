@@ -1,8 +1,12 @@
 val open_file : string -> unit
 
-val has_ended : unit -> bool
+val has_reached_end : unit -> bool
+
+val has_reached_start : unit -> bool
 
 val next_line : unit -> unit
+
+val prev_line : unit -> unit
 
 val get_curr_line : unit -> string
 

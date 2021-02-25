@@ -30,9 +30,21 @@ let open_file file_path =
   file_source := file_path;
   file := Array.of_list (build_list [] f)
 
-let has_ended () = !current_line >= Array.length !file
+let has_reached_end () = !current_line >= Array.length !file
 
-let next_line () = current_line := !current_line + 1
+let has_reached_start () = !current_line <= 0
+
+let next_line () =
+  if not (has_reached_end ()) then
+    current_line := !current_line + 1
+  else
+    ()
+
+let prev_line () =
+  if not (has_reached_start ()) then
+    current_line := !current_line - 1
+  else
+    ()
 
 let get_curr_line () = Array.get !file !current_line
 

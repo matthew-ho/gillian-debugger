@@ -1,6 +1,7 @@
 type stop_reason =
   | Step
-  | Exited
+  | Reached_start
+  | Reached_end
   | Uncaught_exc
 
 type frame =
@@ -13,8 +14,12 @@ type frame =
 
 val launch : string -> unit
 
-val run : unit -> stop_reason
+val step : ?reverse:bool -> unit -> stop_reason
 
-val step : unit -> stop_reason
+val step_back : unit -> stop_reason
+
+val run : ?reverse:bool -> unit -> stop_reason
+
+val reverse_run : unit -> stop_reason
 
 val get_frames : unit -> frame list

@@ -16,16 +16,23 @@ let run ~launch_args rpc =
         Log.info "Do not stop on entry";
         let stop_reason = Debugger.run () in
         match stop_reason with
-        | Debugger.Step ->
+        | Debugger.Step | Debugger.Reached_start ->
           let () =
             Log.info
               "Debugger stopped because of step after running. This should not \
                happen"
           in
           Lwt.return_unit
-        | Debugger.Exited ->
-          Lwt.return_unit
-          (* Do not send Terminated event to allow for stepping backwards *)
+        | Debugger.Reached_end ->
+          (* Send step stopped event to allow for stepping backwards *)
+          Debug_rpc.send_event
+            rpc
+            (module Stopped_event)
+            Stopped_event.Payload.(
+              make
+                ~reason:Stopped_event.Payload.Reason.Step
+                ~thread_id:(Some 0)
+                ())
         | Debugger.Uncaught_exc ->
           Debug_rpc.send_event
             rpc
@@ -50,8 +57,8 @@ let run ~launch_args rpc =
     (module Disconnect_command)
     (fun _ ->
       Log.info
-        "Disconnect request received: we do not support interrupting the \
-         debugger";
+        "Disconnect request received: interrupting the debugger is not \
+         supported";
       Debug_rpc.remove_command_handler rpc (module Disconnect_command);
       Lwt.wakeup_later_exn resolver Exit;
       Lwt.return_unit);

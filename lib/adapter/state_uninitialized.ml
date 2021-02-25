@@ -16,6 +16,7 @@ let run rpc =
           make
             ~supports_configuration_done_request:(Some true)
             ~supports_breakpoint_locations_request:(Some true)
+            ~supports_step_back:(Some true)
             ())
       in
       Lwt.wakeup_later resolver (arg, caps);

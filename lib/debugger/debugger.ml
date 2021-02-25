@@ -1,6 +1,7 @@
 type stop_reason =
   | Step
-  | Exited
+  | Reached_start
+  | Reached_end
   | Uncaught_exc
 
 type frame =
@@ -11,33 +12,45 @@ type frame =
   ; col_num : int
   }
 
-let execute_next_line () =
-  Log.info ("Executing line:  " ^ Debugger_state.get_curr_line ());
-  Debugger_state.next_line ()
+let execute_line reverse =
+  match reverse with
+  | true ->
+    Debugger_state.prev_line ()
+  | false ->
+    let () = Log.info ("Executing line:  " ^ Debugger_state.get_curr_line ()) in
+    Debugger_state.next_line ()
 
 let launch file_name = Debugger_state.open_file file_name
 
-let step () =
-  if Debugger_state.has_ended () then
+let step ?(reverse = false) () =
+  let () = execute_line reverse in
+  if Debugger_state.has_reached_start () then
+    let () = Log.info "Program has reached start" in
+    Reached_start
+  else if Debugger_state.has_reached_end () then
     let () = Log.info "Program has finished running" in
-    Exited
+    Reached_end
   else if Debugger_state.has_hit_exception () then
     let () = Log.info "Uncaught exception has been hit" in
     Uncaught_exc
   else
-    let () = execute_next_line () in
     Step
 
-let rec run () =
-  let stop_reason = step () in
+let step_back () = step ~reverse:true ()
+
+let rec run ?(reverse = false) () =
+  let stop_reason = step ~reverse () in
   match stop_reason with
-  | Exited ->
-    Exited
+  | Step ->
+    run ~reverse ()
+  | Reached_start ->
+    Reached_start
+  | Reached_end ->
+    Reached_end
   | Uncaught_exc ->
     Uncaught_exc
-  | Step ->
-    let () = execute_next_line () in
-    run ()
+
+let reverse_run () = run ~reverse:true ()
 
 let get_frames () =
   [ ({ index = Debugger_state.get_index ()
