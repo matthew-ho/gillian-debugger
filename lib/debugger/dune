@@ -1,4 +1,4 @@
 (library
  (name debugger)
  (public_name gillian-debugger.debugger)
- (libraries log))
+ (libraries log utils))

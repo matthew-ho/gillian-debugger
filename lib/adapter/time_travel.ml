@@ -10,6 +10,15 @@ let send_stopped_events stop_reason rpc =
       (module Stopped_event)
       Stopped_event.Payload.(
         make ~reason:Stopped_event.Payload.Reason.Step ~thread_id:(Some 0) ())
+  | Debugger.Breakpoint ->
+    Debug_rpc.send_event
+      rpc
+      (module Stopped_event)
+      Stopped_event.Payload.(
+        make
+          ~reason:Stopped_event.Payload.Reason.Breakpoint
+          ~thread_id:(Some 0)
+          ())
   | Debugger.Uncaught_exc ->
     Debug_rpc.send_event
       rpc

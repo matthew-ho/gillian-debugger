@@ -2,6 +2,7 @@ type stop_reason =
   | Step
   | Reached_start
   | Reached_end
+  | Breakpoint
   | Uncaught_exc
 
 type frame =
@@ -30,6 +31,9 @@ let step ?(reverse = false) () =
   else if Debugger_state.has_reached_end () then
     let () = Log.info "Program has finished running" in
     Reached_end
+  else if Debugger_state.has_hit_breakpoint () then
+    let () = Log.info "Breakpoint has been hit" in
+    Breakpoint
   else if Debugger_state.has_hit_exception () then
     let () = Log.info "Uncaught exception has been hit" in
     Uncaught_exc
@@ -47,6 +51,8 @@ let rec run ?(reverse = false) () =
     Reached_start
   | Reached_end ->
     Reached_end
+  | Breakpoint ->
+    Breakpoint
   | Uncaught_exc ->
     Uncaught_exc
 
@@ -61,3 +67,6 @@ let get_frames () =
      }
       : frame)
   ]
+
+let set_breakpoints source_path bps =
+  Debugger_state.set_breakpoints source_path bps

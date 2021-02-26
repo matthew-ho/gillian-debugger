@@ -6,6 +6,8 @@ let current_line = ref 0
 
 let current_col = ref 0
 
+let breakpoints = ref Utils.IntSet.IntSet.empty
+
 let rec build_list l in_channel =
   match input_line in_channel with
   | line ->
@@ -61,3 +63,12 @@ let get_curr_line_num () = !current_line + 1
 
 (* Column numbers in client start from 1. Our column numbers start from 0. *)
 let get_curr_col_num () = !current_col + 1
+
+let set_breakpoints source bps =
+  if source <> !file_source then
+    Log.info ("Unable to set breakpoints for source file" ^ !file_source)
+  else
+    breakpoints := bps
+
+let has_hit_breakpoint () =
+  Utils.IntSet.IntSet.mem (get_curr_line_num ()) !breakpoints

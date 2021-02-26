@@ -2,6 +2,7 @@ type stop_reason =
   | Step
   | Reached_start
   | Reached_end
+  | Breakpoint
   | Uncaught_exc
 
 type frame =
@@ -23,3 +24,5 @@ val run : ?reverse:bool -> unit -> stop_reason
 val reverse_run : unit -> stop_reason
 
 val get_frames : unit -> frame list
+
+val set_breakpoints : string -> Utils.IntSet.IntSet.t -> unit
