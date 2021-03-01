@@ -13,6 +13,23 @@ type frame =
   ; col_num : int
   }
 
+type scope =
+  { name : string
+  ; id : int
+  }
+
+type variable =
+  { name : string
+  ; value : string
+  ; type_ : string option
+  }
+
+let scopes_tbl = Hashtbl.create 0
+
+let global_scope = ({ name = "Global"; id = 1 } : scope)
+
+let local_scope = ({ name = "Local"; id = 2 } : scope)
+
 let execute_line reverse =
   match reverse with
   | true ->
@@ -21,7 +38,10 @@ let execute_line reverse =
     let () = Log.info ("Executing line:  " ^ Debugger_state.get_curr_line ()) in
     Debugger_state.next_line ()
 
-let launch file_name = Debugger_state.open_file file_name
+let launch file_name =
+  Hashtbl.replace scopes_tbl global_scope.id global_scope.name;
+  Hashtbl.replace scopes_tbl local_scope.id local_scope.name;
+  Debugger_state.open_file file_name
 
 let step ?(reverse = false) () =
   let () = execute_line reverse in
@@ -70,3 +90,16 @@ let get_frames () =
 
 let set_breakpoints source_path bps =
   Debugger_state.set_breakpoints source_path bps
+
+let get_scopes () = [ global_scope; local_scope ]
+
+let get_variables var_ref =
+  match Hashtbl.find_opt scopes_tbl var_ref with
+  | None ->
+    []
+  | Some id ->
+    [ ({ name = id ^ "_i"; value = "21354"; type_ = Some "integer" } : variable)
+    ; ({ name = id ^ "_f"; value = "4.52"; type_ = Some "float" } : variable)
+    ; ({ name = id ^ "_s"; value = "hello world"; type_ = Some "string" }
+        : variable)
+    ]

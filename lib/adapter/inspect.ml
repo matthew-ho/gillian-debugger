@@ -30,4 +30,32 @@ let run rpc =
                  ())
       in
       Lwt.return Stack_trace_command.Result.(make ~stack_frames ()));
+  Debug_rpc.set_command_handler
+    rpc
+    (module Scopes_command)
+    (fun _ ->
+      let scopes = Debugger.get_scopes () in
+      let scopes =
+        scopes
+        |> List.map (fun (scope : Debugger.scope) ->
+               let name = scope.name in
+               let variables_reference = scope.id in
+               Scope.make ~name ~variables_reference ~expensive:false ())
+      in
+      (* let scopes = [] in *)
+      Lwt.return (Scopes_command.Result.make ~scopes ()));
+  Debug_rpc.set_command_handler
+    rpc
+    (module Variables_command)
+    (fun args ->
+      let variables = Debugger.get_variables args.variables_reference in
+      let variables =
+        variables
+        |> List.map (fun (var : Debugger.variable) ->
+               let name = var.name in
+               let value = var.value in
+               let type_ = var.type_ in
+               Variable.make ~name ~value ~type_ ~variables_reference:0 ())
+      in
+      Lwt.return (Variables_command.Result.make ~variables ()));
   Lwt.join [ promise ]
