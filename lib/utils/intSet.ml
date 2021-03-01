@@ -1,1 +1,1 @@
-module IntSet = Set.Make (Int)
+include Set.Make (Int)

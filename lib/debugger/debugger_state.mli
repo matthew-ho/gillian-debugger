@@ -22,6 +22,6 @@ val get_curr_line_num : unit -> int
 
 val get_curr_col_num : unit -> int
 
-val set_breakpoints : string -> Utils.IntSet.IntSet.t -> unit
+val set_breakpoints : string -> IntSet.t -> unit
 
 val has_hit_breakpoint : unit -> bool

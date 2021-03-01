@@ -15,7 +15,7 @@ let run rpc =
         |> Option.value ~default:[]
         |> Stdlib.List.map (fun bp -> bp.Source_breakpoint.line)
       in
-      let bp_set = Utils.IntSet.IntSet.of_list bp_list in
+      let bp_set = IntSet.of_list bp_list in
       let breakpoints =
         bp_list
         |> Stdlib.List.map (fun line ->

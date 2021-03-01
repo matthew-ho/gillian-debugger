@@ -25,4 +25,4 @@ val reverse_run : unit -> stop_reason
 
 val get_frames : unit -> frame list
 
-val set_breakpoints : string -> Utils.IntSet.IntSet.t -> unit
+val set_breakpoints : string -> IntSet.t -> unit

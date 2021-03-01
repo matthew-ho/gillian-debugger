@@ -6,7 +6,7 @@ let current_line = ref 0
 
 let current_col = ref 0
 
-let breakpoints = ref Utils.IntSet.IntSet.empty
+let breakpoints = ref IntSet.empty
 
 let rec build_list l in_channel =
   match input_line in_channel with
@@ -70,5 +70,4 @@ let set_breakpoints source bps =
   else
     breakpoints := bps
 
-let has_hit_breakpoint () =
-  Utils.IntSet.IntSet.mem (get_curr_line_num ()) !breakpoints
+let has_hit_breakpoint () = IntSet.mem (get_curr_line_num ()) !breakpoints
