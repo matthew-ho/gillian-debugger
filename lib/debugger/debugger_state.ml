@@ -71,3 +71,5 @@ let set_breakpoints source bps =
     breakpoints := bps
 
 let has_hit_breakpoint () = IntSet.mem (get_curr_line_num ()) !breakpoints
+
+let get_words () = Str.split (Str.regexp " ") (get_curr_line ())

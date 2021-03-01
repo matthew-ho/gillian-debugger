@@ -98,8 +98,17 @@ let get_variables var_ref =
   | None ->
     []
   | Some id ->
-    [ ({ name = id ^ "_i"; value = "21354"; type_ = Some "integer" } : variable)
-    ; ({ name = id ^ "_f"; value = "4.52"; type_ = Some "float" } : variable)
-    ; ({ name = id ^ "_s"; value = "hello world"; type_ = Some "string" }
-        : variable)
-    ]
+    if id = "Global" then
+      [ ({ name = id ^ "_i"; value = "21354"; type_ = Some "integer" }
+          : variable)
+      ; ({ name = id ^ "_f"; value = "4.52"; type_ = Some "float" } : variable)
+      ; ({ name = id ^ "_s"; value = "hello world"; type_ = Some "string" }
+          : variable)
+      ]
+    else
+      Debugger_state.get_words ()
+      |> List.map (fun (word : string) : variable ->
+             { name = word
+             ; value = string_of_int (String.length word)
+             ; type_ = Some "integer"
+             })

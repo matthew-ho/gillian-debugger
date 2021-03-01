@@ -1,5 +1,5 @@
 (library
  (name debugger)
  (public_name gillian-debugger.debugger)
- (libraries log utils)
+ (libraries log utils str)
  (flags -open Utils))

@@ -25,3 +25,5 @@ val get_curr_col_num : unit -> int
 val set_breakpoints : string -> IntSet.t -> unit
 
 val has_hit_breakpoint : unit -> bool
+
+val get_words : unit -> string list
