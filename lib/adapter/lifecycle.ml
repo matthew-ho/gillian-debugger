@@ -1,6 +1,6 @@
 open Debug_protocol_ex
 
-let run ~launch_args rpc =
+let run ~launch_args ~dbg rpc =
   let promise, resolver = Lwt.task () in
   Lwt.pause ();%lwt
   let send_initialize_event () =
@@ -14,7 +14,7 @@ let run ~launch_args rpc =
       let open Launch_command.Arguments in
       if not launch_args.stop_on_entry then (
         Log.info "Do not stop on entry";
-        let stop_reason = Debugger.run () in
+        let stop_reason = Debugger.run dbg in
         match stop_reason with
         | Debugger.Step | Debugger.Reached_start ->
           let () =

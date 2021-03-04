@@ -29,14 +29,14 @@ let send_stopped_events stop_reason rpc =
           ~thread_id:(Some 0)
           ())
 
-let run rpc =
+let run ~dbg rpc =
   Lwt.pause ();%lwt
   Debug_rpc.set_command_handler
     rpc
     (module Continue_command)
     (fun _ ->
       let () = Log.info "Continue request received" in
-      let stop_reason = Debugger.run () in
+      let stop_reason = Debugger.run dbg in
       send_stopped_events stop_reason rpc;%lwt
       Lwt.return (Continue_command.Result.make ()));
   Debug_rpc.set_command_handler
@@ -44,20 +44,20 @@ let run rpc =
     (module Next_command)
     (fun _ ->
       let () = Log.info "Next request received" in
-      let stop_reason = Debugger.step () in
+      let stop_reason = Debugger.step dbg in
       send_stopped_events stop_reason rpc);
   Debug_rpc.set_command_handler
     rpc
     (module Reverse_continue_command)
     (fun _ ->
       let () = Log.info "Reverse continue request received" in
-      let stop_reason = Debugger.reverse_run () in
+      let stop_reason = Debugger.reverse_run dbg in
       send_stopped_events stop_reason rpc);
   Debug_rpc.set_command_handler
     rpc
     (module Step_back_command)
     (fun _ ->
       let () = Log.info "Step back request received" in
-      let stop_reason = Debugger.step_back () in
+      let stop_reason = Debugger.step_back dbg in
       send_stopped_events stop_reason rpc);
   Lwt.return ()

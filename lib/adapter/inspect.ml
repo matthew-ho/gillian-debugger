@@ -1,6 +1,6 @@
 open Debug_protocol_ex
 
-let run rpc =
+let run ~dbg rpc =
   let promise, _ = Lwt.task () in
   Debug_rpc.set_command_handler
     rpc
@@ -14,7 +14,7 @@ let run rpc =
     (module Stack_trace_command)
     (fun _ ->
       let () = Log.info "Stack trace request received" in
-      let (frames : Debugger.frame list) = Debugger.get_frames () in
+      let (frames : Debugger.frame list) = Debugger.get_frames dbg in
       let stack_frames =
         frames
         |> Stdlib.List.map (fun (frame : Debugger.frame) ->
@@ -34,7 +34,7 @@ let run rpc =
     rpc
     (module Scopes_command)
     (fun _ ->
-      let scopes = Debugger.get_scopes () in
+      let scopes = Debugger.get_scopes dbg in
       let scopes =
         scopes
         |> List.map (fun (scope : Debugger.scope) ->
@@ -48,7 +48,7 @@ let run rpc =
     rpc
     (module Variables_command)
     (fun args ->
-      let variables = Debugger.get_variables args.variables_reference in
+      let variables = Debugger.get_variables args.variables_reference dbg in
       let variables =
         variables
         |> List.map (fun (var : Debugger.variable) ->

@@ -1,7 +1,7 @@
-let run ~launch_args rpc =
+let run ~launch_args ~dbg rpc =
   Lwt.join
-    [ Lifecycle.run ~launch_args rpc
-    ; Inspect.run rpc
-    ; Breakpoints.run rpc
-    ; Time_travel.run rpc
+    [ Lifecycle.run ~launch_args ~dbg rpc
+    ; Inspect.run ~dbg rpc
+    ; Breakpoints.run ~dbg rpc
+    ; Time_travel.run ~dbg rpc
     ]

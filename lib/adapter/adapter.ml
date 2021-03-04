@@ -6,8 +6,8 @@ let start in_ out =
          Log.info "Initializing Debug Adapter...";
          let%lwt _, _ = State_uninitialized.run rpc in
          Log.info "Initialized Debug Adapter";
-         let%lwt launch_args = State_initialized.run rpc in
-         State_debug.run ~launch_args rpc;%lwt
+         let%lwt launch_args, dbg = State_initialized.run rpc in
+         State_debug.run ~launch_args ~dbg rpc;%lwt
          fst (Lwt.task ())
        with
       | Exit ->

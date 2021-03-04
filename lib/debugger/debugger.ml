@@ -24,49 +24,119 @@ type variable =
   ; type_ : string option
   }
 
+type debugger_state =
+  { file : string Array.t
+  ; file_source : string
+  ; scopes : scope list
+  ; mutable curr_line : int
+  ; mutable curr_col : int
+  ; mutable breakpoints : IntSet.t
+  }
+
 let scopes_tbl = Hashtbl.create 0
 
 let global_scope = ({ name = "Global"; id = 1 } : scope)
 
 let local_scope = ({ name = "Local"; id = 2 } : scope)
 
-let execute_line reverse =
+let contains s1 s2 =
+  try
+    let len = String.length s2 in
+    for i = 0 to String.length s1 - len do
+      if Stdlib.String.sub s1 i len = s2 then raise Exit
+    done;
+    false
+  with
+  | Exit ->
+    true
+
+let rec build_list l in_channel =
+  match input_line in_channel with
+  | line ->
+    build_list (line :: l) in_channel
+  | exception End_of_file ->
+    close_in in_channel;
+    List.rev l
+
+let open_file file_path =
+  let f = open_in file_path in
+  Array.of_list (build_list [] f)
+
+let has_reached_end dbg = dbg.curr_line >= Array.length dbg.file
+
+let has_reached_start dbg = dbg.curr_line <= 0
+
+let next_line dbg =
+  if not (has_reached_end dbg) then
+    dbg.curr_line <- dbg.curr_line + 1
+  else
+    ()
+
+let prev_line dbg =
+  if not (has_reached_start dbg) then
+    dbg.curr_line <- dbg.curr_line - 1
+  else
+    ()
+
+let get_curr_line dbg = Array.get dbg.file dbg.curr_line
+
+let has_hit_exception dbg =
+  contains (Array.get dbg.file dbg.curr_line) "exception"
+
+(* Line numbers in client start from 1. Our line numbers start from 0. *)
+let get_curr_line_num dbg = dbg.curr_line + 1
+
+(* Column numbers in client start from 1. Our column numbers start from 0. *)
+let get_curr_col_num dbg = dbg.curr_col + 1
+
+let has_hit_breakpoint dbg = IntSet.mem (get_curr_line_num dbg) dbg.breakpoints
+
+let get_words dbg = Str.split (Str.regexp " ") (get_curr_line dbg)
+
+let execute_line reverse dbg =
   match reverse with
   | true ->
-    Debugger_state.prev_line ()
+    prev_line dbg
   | false ->
-    let () = Log.info ("Executing line:  " ^ Debugger_state.get_curr_line ()) in
-    Debugger_state.next_line ()
+    let () = Log.info ("Executing line:  " ^ get_curr_line dbg) in
+    next_line dbg
 
 let launch file_name =
   Hashtbl.replace scopes_tbl global_scope.id global_scope.name;
   Hashtbl.replace scopes_tbl local_scope.id local_scope.name;
-  Debugger_state.open_file file_name
+  ({ file = open_file file_name
+   ; file_source = file_name
+   ; scopes = [ global_scope; local_scope ]
+   ; curr_line = 0
+   ; curr_col = 0
+   ; breakpoints = IntSet.empty
+   }
+    : debugger_state)
 
-let step ?(reverse = false) () =
-  let () = execute_line reverse in
-  if Debugger_state.has_reached_start () then
+let step ?(reverse = false) dbg =
+  let () = execute_line reverse dbg in
+  if has_reached_start dbg then
     let () = Log.info "Program has reached start" in
     Reached_start
-  else if Debugger_state.has_reached_end () then
+  else if has_reached_end dbg then
     let () = Log.info "Program has finished running" in
     Reached_end
-  else if Debugger_state.has_hit_breakpoint () then
+  else if has_hit_breakpoint dbg then
     let () = Log.info "Breakpoint has been hit" in
     Breakpoint
-  else if Debugger_state.has_hit_exception () then
+  else if has_hit_exception dbg then
     let () = Log.info "Uncaught exception has been hit" in
     Uncaught_exc
   else
     Step
 
-let step_back () = step ~reverse:true ()
+let step_back dbg = step ~reverse:true dbg
 
-let rec run ?(reverse = false) () =
-  let stop_reason = step ~reverse () in
+let rec run ?(reverse = false) dbg =
+  let stop_reason = step ~reverse dbg in
   match stop_reason with
   | Step ->
-    run ~reverse ()
+    run ~reverse dbg
   | Reached_start ->
     Reached_start
   | Reached_end ->
@@ -76,24 +146,27 @@ let rec run ?(reverse = false) () =
   | Uncaught_exc ->
     Uncaught_exc
 
-let reverse_run () = run ~reverse:true ()
+let reverse_run dbg = run ~reverse:true dbg
 
-let get_frames () =
-  [ ({ index = Debugger_state.get_index ()
-     ; name = Debugger_state.get_name ()
-     ; source_path = Debugger_state.get_source ()
-     ; line_num = Debugger_state.get_curr_line_num ()
-     ; col_num = Debugger_state.get_curr_col_num ()
+let get_frames dbg =
+  [ ({ index = 0
+     ; name = "This is a test"
+     ; source_path = dbg.file_source
+     ; line_num = get_curr_line_num dbg
+     ; col_num = get_curr_col_num dbg
      }
       : frame)
   ]
 
-let set_breakpoints source_path bps =
-  Debugger_state.set_breakpoints source_path bps
+let set_breakpoints source_path bps dbg =
+  if source_path <> dbg.file_source then
+    Log.info ("Unable to set breakpoints for source file" ^ source_path)
+  else
+    dbg.breakpoints <- bps
 
-let get_scopes () = [ global_scope; local_scope ]
+let get_scopes dbg = dbg.scopes
 
-let get_variables var_ref =
+let get_variables var_ref dbg =
   match Hashtbl.find_opt scopes_tbl var_ref with
   | None ->
     []
@@ -106,7 +179,7 @@ let get_variables var_ref =
           : variable)
       ]
     else
-      Debugger_state.get_words ()
+      get_words dbg
       |> List.map (fun (word : string) : variable ->
              { name = word
              ; value = string_of_int (String.length word)

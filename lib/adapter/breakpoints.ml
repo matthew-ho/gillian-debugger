@@ -1,6 +1,6 @@
 open Debug_protocol_ex
 
-let run rpc =
+let run ~dbg rpc =
   Lwt.pause ();%lwt
   Debug_rpc.set_command_handler
     rpc
@@ -25,7 +25,7 @@ let run rpc =
                  ~line:(Some line)
                  ())
       in
-      Debugger.set_breakpoints source bp_set;
+      Debugger.set_breakpoints source bp_set dbg;
       Lwt.return Set_breakpoints_command.Result.(make ~breakpoints ()));
   Debug_rpc.set_command_handler
     rpc

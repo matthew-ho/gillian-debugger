@@ -12,8 +12,8 @@ let run rpc =
     (fun (launch_args : Debug_protocol_ex.Launch_command.Arguments.t) ->
       Log.info "Launch request received";
       prevent_reenter ();
-      Debugger.launch launch_args.Launch_command.Arguments.program;
-      Lwt.wakeup_later resolver launch_args;
+      let dbg = Debugger.launch launch_args.Launch_command.Arguments.program in
+      Lwt.wakeup_later resolver (launch_args, dbg);
       Lwt.return_unit);
   Debug_rpc.set_command_handler
     rpc

@@ -24,20 +24,29 @@ type variable =
   ; type_ : string option
   }
 
-val launch : string -> unit
+type debugger_state =
+  { file : string Array.t
+  ; file_source : string
+  ; scopes : scope list
+  ; mutable curr_line : int
+  ; mutable curr_col : int
+  ; mutable breakpoints : IntSet.t
+  }
 
-val step : ?reverse:bool -> unit -> stop_reason
+val launch : string -> debugger_state
 
-val step_back : unit -> stop_reason
+val step : ?reverse:bool -> debugger_state -> stop_reason
 
-val run : ?reverse:bool -> unit -> stop_reason
+val step_back : debugger_state -> stop_reason
 
-val reverse_run : unit -> stop_reason
+val run : ?reverse:bool -> debugger_state -> stop_reason
 
-val get_frames : unit -> frame list
+val reverse_run : debugger_state -> stop_reason
 
-val set_breakpoints : string -> IntSet.t -> unit
+val get_frames : debugger_state -> frame list
 
-val get_scopes : unit -> scope list
+val set_breakpoints : string -> IntSet.t -> debugger_state -> unit
 
-val get_variables : int -> variable list
+val get_scopes : debugger_state -> scope list
+
+val get_variables : int -> debugger_state -> variable list
