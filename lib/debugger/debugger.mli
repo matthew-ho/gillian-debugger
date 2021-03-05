@@ -34,7 +34,7 @@ type debugger_state =
   ; mutable breakpoints : IntSet.t
   }
 
-val launch : string -> debugger_state
+val launch : string -> (debugger_state, string) result
 
 val step : ?reverse:bool -> debugger_state -> stop_reason
 

@@ -62,7 +62,17 @@ let rec build_list l in_channel =
 let open_file file_path db =
   let f = open_in file_path in
   let file = Array.of_list (build_list [] f) in
-  let () = Array.iteri (fun index line -> Db.store_line index line db) file in
+  let () =
+    Array.iteri
+      (fun index line ->
+        match Db.store_line index line db with
+        | Ok () ->
+          Log.info (Printf.sprintf "Successfully stored line: %s" line)
+        | Error err ->
+          (* TODO: stop execution if this happens? *)
+          Log.info (Printf.sprintf "Could not store line: %s" err))
+      file
+  in
   Array.length file
 
 let has_reached_end dbg = dbg.curr_line >= dbg.file_length
@@ -81,7 +91,13 @@ let prev_line dbg =
   else
     ()
 
-let get_curr_line_content dbg = Db.get_line dbg.curr_line dbg.execution_store
+let get_curr_line_content dbg =
+  match Db.get_line dbg.curr_line dbg.execution_store with
+  | Ok line ->
+    line
+  | Error err ->
+    let () = Log.info err in
+    ""
 
 let has_hit_exception dbg = contains (get_curr_line_content dbg) "exception"
 
@@ -108,17 +124,21 @@ let launch file_name =
   Hashtbl.replace scopes_tbl global_scope.id global_scope.name;
   Hashtbl.replace scopes_tbl local_scope.id local_scope.name;
   Db.reset ();
-  let db = Db.create () in
-  let file_length = open_file file_name db in
-  ({ file_source = file_name
-   ; scopes = [ global_scope; local_scope ]
-   ; execution_store = db
-   ; file_length
-   ; curr_line = 0
-   ; curr_col = 0
-   ; breakpoints = IntSet.empty
-   }
-    : debugger_state)
+  match Db.create () with
+  | Ok db ->
+    let file_length = open_file file_name db in
+    Ok
+      ({ file_source = file_name
+       ; scopes = [ global_scope; local_scope ]
+       ; execution_store = db
+       ; file_length
+       ; curr_line = 0
+       ; curr_col = 0
+       ; breakpoints = IntSet.empty
+       }
+        : debugger_state)
+  | Error err ->
+    Error err
 
 let step ?(reverse = false) dbg =
   let () = execute_line reverse dbg in

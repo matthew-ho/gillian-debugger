@@ -42,7 +42,6 @@ let run ~dbg rpc =
                let variables_reference = scope.id in
                Scope.make ~name ~variables_reference ~expensive:false ())
       in
-      (* let scopes = [] in *)
       Lwt.return (Scopes_command.Result.make ~scopes ()));
   Debug_rpc.set_command_handler
     rpc
