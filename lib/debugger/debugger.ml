@@ -81,11 +81,9 @@ let prev_line dbg =
   else
     ()
 
-let get_curr_line_content dbg =
-  Db.get_line dbg.curr_line dbg.execution_store
+let get_curr_line_content dbg = Db.get_line dbg.curr_line dbg.execution_store
 
-let has_hit_exception dbg =
-  contains (get_curr_line_content dbg) "exception"
+let has_hit_exception dbg = contains (get_curr_line_content dbg) "exception"
 
 (* Line numbers in client start from 1. Our line numbers start from 0. *)
 let get_curr_line_num dbg = dbg.curr_line + 1
@@ -95,8 +93,7 @@ let get_curr_col_num dbg = dbg.curr_col + 1
 
 let has_hit_breakpoint dbg = IntSet.mem (get_curr_line_num dbg) dbg.breakpoints
 
-let get_words dbg =
-  Str.split (Str.regexp " ") (get_curr_line_content dbg)
+let get_words dbg = Str.split (Str.regexp " ") (get_curr_line_content dbg)
 
 let execute_line reverse dbg =
   match reverse with
@@ -116,7 +113,7 @@ let launch file_name =
   ({ file_source = file_name
    ; scopes = [ global_scope; local_scope ]
    ; execution_store = db
-   ; file_length = file_length
+   ; file_length
    ; curr_line = 0
    ; curr_col = 0
    ; breakpoints = IntSet.empty

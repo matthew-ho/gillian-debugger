@@ -2,12 +2,15 @@ open Sqlite3
 
 let db_name = "gillian_debugger.db"
 
-let create_log_table_sql =
-  "CREATE TABLE log ( line_number INTEGER PRIMARY KEY, content TEXT NOT NULL );"
-
 let create () =
   let db = db_open db_name in
-  let response = exec db create_log_table_sql in
+  let stmt =
+    prepare
+      db
+      "CREATE TABLE log ( line_number INTEGER PRIMARY KEY, content TEXT NOT \
+       NULL );"
+  in
+  let response = step stmt in
   let () =
     if Rc.is_success response then
       Log.info "DB: sucessfully created log table"
@@ -23,42 +26,52 @@ let reset () =
     ()
 
 let store_line line_num content db =
-  let sql =
-    "INSERT INTO log VALUES ("
-    ^ string_of_int line_num
-    ^ ", '"
-    ^ content
-    ^ "');"
-  in
-  let response = exec db sql in
+  let stmt = prepare db "INSERT INTO log VALUES (?, ?);" in
+  let response = bind stmt 1 (Data.opt_int (Some line_num)) in
+
   if Rc.is_success response then
-    Log.info ("DB: sucessfully stored line=" ^ content)
+    let response = bind stmt 2 (Data.opt_text (Some content)) in
+    if Rc.is_success response then
+      let response = step stmt in
+      if Rc.is_success response then
+        Log.info ("DB: sucessfully stored line=" ^ content)
+      else
+        Log.info ("DB: unable to store line, error=" ^ Rc.to_string response)
+    else
+      Log.info ("DB: unable to store line, error=" ^ Rc.to_string response)
   else
     Log.info ("DB: unable to store line, error=" ^ Rc.to_string response)
 
-let exec_no_headers_wrapper db stmt =
-  let acc = ref (Array.of_list []) in
-  let cb rows = acc := rows in
-  let response = exec_no_headers db ~cb stmt in
-  if Rc.is_success response then
-    Ok !acc
-  else
-    Error (Rc.to_string response)
-
 let get_line line_num db =
-  let stmt =
-    "SELECT content FROM log WHERE line_number=" ^ string_of_int line_num ^ ";"
-  in
-  let response = exec_no_headers_wrapper db stmt in
-  match response with
-  | Ok rows ->
-    (match rows.(0) with
-    | Some content ->
-      let () = Log.info ("DB: get line succeeded for line_num=" ^ string_of_int line_num) in
+  let stmt = prepare db "SELECT content FROM log WHERE line_number=?;" in
+  let response = bind stmt 1 (Data.opt_int (Some line_num)) in
+  if Rc.is_success response then
+    let response = step stmt in
+    if response == Rc.ROW then
+      let rows = row_blobs stmt in
+      let content = rows.(0) in
+      let () =
+        Log.info
+          ("DB: get line succeeded for line_num="
+          ^ string_of_int line_num
+          ^ "content="
+          ^ content)
+      in
       content
-    | None ->
-      let () = Log.info ("DB: get line failed for line_num=" ^ string_of_int line_num) in
-      "")
-  | Error err ->
-    let () = Log.info ("DB: get line failed for line_num=" ^ string_of_int line_num ^ ", error=" ^ err) in
+    else
+      let () =
+        Log.info
+          ("DB: get line failed for line_num="
+          ^ string_of_int line_num
+          ^ ", error=NO_DATA")
+      in
+      ""
+  else
+    let () =
+      Log.info
+        ("DB: get line failed for line_num="
+        ^ string_of_int line_num
+        ^ ", error="
+        ^ Rc.to_string response)
+    in
     ""
