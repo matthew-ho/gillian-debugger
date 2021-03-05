@@ -1,0 +1,4 @@
+(library
+ (name db)
+ (public_name gillian-debugger._db)
+ (libraries log sqlite3))

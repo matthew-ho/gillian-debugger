@@ -25,9 +25,10 @@ type variable =
   }
 
 type debugger_state =
-  { file : string Array.t
-  ; file_source : string
+  { file_source : string
   ; scopes : scope list
+  ; execution_store : Sqlite3.db
+  ; file_length : int
   ; mutable curr_line : int
   ; mutable curr_col : int
   ; mutable breakpoints : IntSet.t
@@ -58,11 +59,13 @@ let rec build_list l in_channel =
     close_in in_channel;
     List.rev l
 
-let open_file file_path =
+let open_file file_path db =
   let f = open_in file_path in
-  Array.of_list (build_list [] f)
+  let file = Array.of_list (build_list [] f) in
+  let () = Array.iteri (fun index line -> Db.store_line index line db) file in
+  Array.length file
 
-let has_reached_end dbg = dbg.curr_line >= Array.length dbg.file
+let has_reached_end dbg = dbg.curr_line >= dbg.file_length
 
 let has_reached_start dbg = dbg.curr_line <= 0
 
@@ -78,10 +81,11 @@ let prev_line dbg =
   else
     ()
 
-let get_curr_line dbg = Array.get dbg.file dbg.curr_line
+let get_curr_line_content dbg =
+  Db.get_line dbg.curr_line dbg.execution_store
 
 let has_hit_exception dbg =
-  contains (Array.get dbg.file dbg.curr_line) "exception"
+  contains (get_curr_line_content dbg) "exception"
 
 (* Line numbers in client start from 1. Our line numbers start from 0. *)
 let get_curr_line_num dbg = dbg.curr_line + 1
@@ -91,22 +95,28 @@ let get_curr_col_num dbg = dbg.curr_col + 1
 
 let has_hit_breakpoint dbg = IntSet.mem (get_curr_line_num dbg) dbg.breakpoints
 
-let get_words dbg = Str.split (Str.regexp " ") (get_curr_line dbg)
+let get_words dbg =
+  Str.split (Str.regexp " ") (get_curr_line_content dbg)
 
 let execute_line reverse dbg =
   match reverse with
   | true ->
     prev_line dbg
   | false ->
-    let () = Log.info ("Executing line:  " ^ get_curr_line dbg) in
+    let curr_line_content = get_curr_line_content dbg in
+    let () = Log.info ("Executing line:  " ^ curr_line_content) in
     next_line dbg
 
 let launch file_name =
   Hashtbl.replace scopes_tbl global_scope.id global_scope.name;
   Hashtbl.replace scopes_tbl local_scope.id local_scope.name;
-  ({ file = open_file file_name
-   ; file_source = file_name
+  Db.reset ();
+  let db = Db.create () in
+  let file_length = open_file file_name db in
+  ({ file_source = file_name
    ; scopes = [ global_scope; local_scope ]
+   ; execution_store = db
+   ; file_length = file_length
    ; curr_line = 0
    ; curr_col = 0
    ; breakpoints = IntSet.empty

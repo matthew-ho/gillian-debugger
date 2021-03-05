@@ -25,9 +25,10 @@ type variable =
   }
 
 type debugger_state =
-  { file : string Array.t
-  ; file_source : string
+  { file_source : string
   ; scopes : scope list
+  ; execution_store : Sqlite3.db
+  ; file_length : int
   ; mutable curr_line : int
   ; mutable curr_col : int
   ; mutable breakpoints : IntSet.t

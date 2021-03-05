@@ -1,5 +1,5 @@
 (library
  (name debugger)
  (public_name gillian-debugger.debugger)
- (libraries log utils str)
+ (libraries db log utils str sqlite3)
  (flags -open Utils))

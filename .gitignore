@@ -24,3 +24,6 @@ node_modules/
 
 # Gillian debugger logs
 *.log
+
+# Gillian database for storing execution logs
+*.db
